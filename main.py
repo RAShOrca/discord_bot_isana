@@ -1,17 +1,20 @@
 import discord
 import os
 import warnings  # FutureWarningを非表示にするため
+from dotenv import load_dotenv  # 追加
 from discord.ext import commands, tasks
 from yahoo_fin import stock_info
-from flask import Flask
-from threading import Thread
 
 # 🔧 FutureWarningを無視
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+# .envファイルから環境変数を読み込む
+load_dotenv()
+
 # 環境変数からトークンを取得
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+print(f"TOKEN: {TOKEN}")
 # グローバル変数（ペアごとのアラート価格を辞書で管理）
 pair_alerts = {}
 
@@ -35,25 +38,6 @@ intents.message_content = True
 
 # ボットのインスタンスを作成 (Application Commands用の設定に変更)
 bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
-
-# Flaskサーバーの設定
-def create_app():
-    app = Flask('')
-
-    @app.route('/')
-    def home():
-        return "I'm alive!"
-
-    return app
-
-app = create_app()
-
-def run():
-    app.run(host='0.0.0.0', port=8080)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
 
 @bot.event
 async def on_ready():
@@ -168,9 +152,6 @@ async def price_watcher():
                         pair_alerts[pair].remove(price)  # この価格だけを削除
             except Exception as e:
                 print(f"⚠️ 価格取得時のエラー: {e}")
-
-# サーバーを維持するためのkeep_alive関数を呼び出す
-keep_alive()
 
 # Discordボットを実行
 bot.run(TOKEN)
