@@ -1,0 +1,3 @@
+discord.py
+yahoo_fin
+python-dotenv
